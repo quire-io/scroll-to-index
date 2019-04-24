@@ -58,7 +58,7 @@ AutoScrollTag(
 
 with the `AutoScrollController` controller.
 
-for full example, please see the example folder.
+for full example, please see the [example](https://github.com/quire-io/scroll-to-index/blob/master/example/example/lib/main.dart).
 
 ## Who Uses
 
