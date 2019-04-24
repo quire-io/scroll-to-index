@@ -13,17 +13,15 @@ import 'package:flutter/widgets.dart';
 
 import 'util.dart';
 
-const testDistanceOffset = 100.0;
-const testDurationUnit = 40;
+const defaultScrollDistanceOffset = 100.0;
+const defaultDurationUnit = 40;
 
-const millisecond = Duration(milliseconds: 1);
-const animationDuration = Duration(milliseconds: 250);
-const highlightDuration = const Duration(seconds: 3);
+const _millisecond = Duration(milliseconds: 1);
+const _highlightDuration = const Duration(seconds: 3);
+const scrollAnimationDuration = Duration(milliseconds: 250);
 
-/// Type for a generic supplier.
-typedef T Supplier<T>();
-/// Type for a generic converter.
-typedef R Converter<T, R>(T item);
+typedef Rect ViewportBoundaryGetter();
+typedef double AxisValueGetter(Rect rect);
 
 Rect defaultViewportBoundaryGetter() => Rect.zero;
 abstract class AutoScrollController implements ScrollController {
@@ -31,7 +29,7 @@ abstract class AutoScrollController implements ScrollController {
     double initialScrollOffset: 0.0,
     bool keepScrollOffset: true,
     double suggestedRowHeight,
-    Supplier<Rect> viewportBoundaryGetter: defaultViewportBoundaryGetter,
+    ViewportBoundaryGetter viewportBoundaryGetter: defaultViewportBoundaryGetter,
     Axis axis,
     String debugLabel,
     AutoScrollController copyTagsFrom
@@ -53,12 +51,12 @@ abstract class AutoScrollController implements ScrollController {
 
   /// used to make the additional boundary for viewport
   /// e.g. a sticky header which covers the real viewport of a list view
-  Supplier<Rect> get viewportBoundaryGetter;
+  ViewportBoundaryGetter get viewportBoundaryGetter;
 
   /// used to choose which direction you are using.
   /// e.g. axis == Axis.horizontal ? (r) => r.left : (r) => r.top
-  Converter<Rect, double> get beginGetter;
-  Converter<Rect, double> get endGetter;
+  AxisValueGetter get beginGetter;
+  AxisValueGetter get endGetter;
 
   /// detect if it's in scrolling (scrolling is a async process)
   bool get isAutoScrolling;
@@ -71,10 +69,10 @@ abstract class AutoScrollController implements ScrollController {
   bool get hasParentController;
 
   /// scroll to the giving index
-  Future scrollToIndex(int index, {Duration duration: animationDuration,
+  Future scrollToIndex(int index, {Duration duration: scrollAnimationDuration,
     AutoScrollPosition preferPosition});
   /// highlight the item
-  Future highlight(int index, {bool cancelExistHighlights: true});
+  Future highlight(int index, {bool cancelExistHighlights: true, Duration highlightDuration: _highlightDuration});
   /// cancel all highlight item immediately.
   void cancelAllHighlights();
 
@@ -83,15 +81,15 @@ abstract class AutoScrollController implements ScrollController {
   bool isIndexStateInLayoutRange(int index);
 }
 
-class SimpleAutoScrollController extends ScrollController with _AutoScrollController {
+class SimpleAutoScrollController extends ScrollController with AutoScrollControllerMixin {
   @override
   final double suggestedRowHeight;
   @override
-  final Supplier<Rect> viewportBoundaryGetter;
+  final ViewportBoundaryGetter viewportBoundaryGetter;
   @override
-  final Converter<Rect, double> beginGetter;
+  final AxisValueGetter beginGetter;
   @override
-  final Converter<Rect, double> endGetter;
+  final AxisValueGetter endGetter;
 
   SimpleAutoScrollController({
     double initialScrollOffset: 0.0,
@@ -109,15 +107,15 @@ class SimpleAutoScrollController extends ScrollController with _AutoScrollContro
   }
 }
 
-class PageAutoScrollController extends PageController with _AutoScrollController {
+class PageAutoScrollController extends PageController with AutoScrollControllerMixin {
   @override
   final double suggestedRowHeight;
   @override
-  final Supplier<Rect> viewportBoundaryGetter;
+  final ViewportBoundaryGetter viewportBoundaryGetter;
   @override
-  final Converter<Rect, double> beginGetter = (r) => r.left;
+  final AxisValueGetter beginGetter = (r) => r.left;
   @override
-  final Converter<Rect, double> endGetter = (r) => r.right;
+  final AxisValueGetter endGetter = (r) => r.right;
 
   PageAutoScrollController({
     int initialPage: 0,
@@ -136,13 +134,13 @@ class PageAutoScrollController extends PageController with _AutoScrollController
 }
 
 enum AutoScrollPosition {begin, middle, end}
-mixin _AutoScrollController on ScrollController implements AutoScrollController {
+mixin AutoScrollControllerMixin on ScrollController implements AutoScrollController {
   @override
   final Map<int, AutoScrollTagState> tagMap = <int, AutoScrollTagState>{};
   double get suggestedRowHeight;
-  Supplier<Rect> get viewportBoundaryGetter;
-  Converter<Rect, double> get beginGetter;
-  Converter<Rect, double> get endGetter;
+  ViewportBoundaryGetter get viewportBoundaryGetter;
+  AxisValueGetter get beginGetter;
+  AxisValueGetter get endGetter;
 
   bool __isAutoScrolling = false;
   set _isAutoScrolling(bool isAutoScrolling) {
@@ -192,12 +190,12 @@ mixin _AutoScrollController on ScrollController implements AutoScrollController 
 
   static const maxBound = 30; // 0.5 second if 60fps
   @override
-  Future scrollToIndex(int index, {Duration duration: animationDuration,
+  Future scrollToIndex(int index, {Duration duration: scrollAnimationDuration,
     AutoScrollPosition preferPosition}) async {
     return co(this, () => _scrollToIndex(index, duration: duration, preferPosition: preferPosition));
   }
 
-  Future _scrollToIndex(int index, {Duration duration: animationDuration, AutoScrollPosition preferPosition}) async {
+  Future _scrollToIndex(int index, {Duration duration: scrollAnimationDuration, AutoScrollPosition preferPosition}) async {
     assert(duration > Duration.zero);
 
     // In listView init or reload case, widget state of list item may not be ready for query.
@@ -240,7 +238,7 @@ mixin _AutoScrollController on ScrollController implements AutoScrollController 
       bool contains = false;
       Duration spentDuration = const Duration();
       double lastScrollDirection = 0.5; // alignment, default center;
-      final moveDuration = animationDuration ~/ testDurationUnit;
+      final moveDuration = duration ~/ defaultDurationUnit;
 
       _isAutoScrolling = true;
       /// ideally, the suggest row height will move to the final corrent offset approximately in just one scroll(iteration).
@@ -253,7 +251,7 @@ mixin _AutoScrollController on ScrollController implements AutoScrollController 
         final moveTarget = _forecastMoveUnit(index, nearest, usedSuggestedRowHeightIfAny);
         // assume suggestRowHeight will move to correct offset in just one time.
         // if the rule doesn't work (in variable row height case), we will use backup solution (non-suggested way)
-        final suggestedDuration = usedSuggestedRowHeightIfAny && suggestedRowHeight != null ? animationDuration : null;
+        final suggestedDuration = usedSuggestedRowHeightIfAny && suggestedRowHeight != null ? duration : null;
         usedSuggestedRowHeightIfAny = false;// just use once
         lastScrollDirection = moveTarget - prevOffset > 0 ? 1 : 0;
         currentOffset = moveTarget;
@@ -273,14 +271,14 @@ mixin _AutoScrollController on ScrollController implements AutoScrollController 
           if (finalOffset != offset) {
             _isAutoScrolling = true;
             final remaining = duration - spentDuration;
-            await animateTo(finalOffset, duration: remaining <= Duration.zero ? millisecond : remaining, curve: Curves.ease);
+            await animateTo(finalOffset, duration: remaining <= Duration.zero ? _millisecond : remaining, curve: Curves.ease);
             await _waitForWidgetStateBuild();
 
             // not sure why it doesn't scroll to the given offset, try more within 3 times
             if (hasClients && offset != finalOffset) {
               final count = 3;
               for (var i = 0; i < count && hasClients && offset != finalOffset; i++) {
-                await animateTo(finalOffset, duration: millisecond, curve: Curves.ease);
+                await animateTo(finalOffset, duration: _millisecond, curve: Curves.ease);
                 await _waitForWidgetStateBuild();
               }
             }
@@ -294,9 +292,9 @@ mixin _AutoScrollController on ScrollController implements AutoScrollController 
   }
 
   @override
-  Future highlight(int index, {bool cancelExistHighlights: true}) async {
+  Future highlight(int index, {bool cancelExistHighlights: true, Duration highlightDuration: _highlightDuration}) async {
     final tag = tagMap[index];
-    return tag == null ? null : await tag.highlight(cancelExisting: cancelExistHighlights);
+    return tag == null ? null : await tag.highlight(cancelExisting: cancelExistHighlights, highlightDuration: highlightDuration);
   }
 
   @override
@@ -335,7 +333,7 @@ mixin _AutoScrollController on ScrollController implements AutoScrollController 
       "ERROR: %%%%%%%%%%%%%%: $targetIndex, $currentNearestIndex, $alignment, $offsetToLastState, ${tagMap.keys.toList().join(',')}");
       absoluteOffsetToViewport = offsetToLastState?.offset;
       if (absoluteOffsetToViewport == null)
-        absoluteOffsetToViewport = testDistanceOffset;
+        absoluteOffsetToViewport = defaultScrollDistanceOffset;
     }
 
     return absoluteOffsetToViewport;
@@ -540,9 +538,9 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W> with TickerPr
     }
   }
 
-  /// we used this flag is only for waiting the [highlightDuration]
+  /// we used this flag is only for waiting the [_highlightDuration]
   bool _isHighlighting = false;
-  Future highlight({bool cancelExisting: true}) async {
+  Future highlight({bool cancelExisting: true, Duration highlightDuration: _highlightDuration}) async {
     if (!mounted)
       return null;
 
@@ -558,13 +556,13 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W> with TickerPr
     }
 
     setState((){});
-    await catchAnimationCancel(_controller.animateTo(1.0, duration: animationDuration));
+    await catchAnimationCancel(_controller.animateTo(1.0, duration: scrollAnimationDuration));
     _isHighlighting = true;
     await Future.delayed(highlightDuration);
 
     if (_controller != null && _isHighlighting) {
       setState((){});
-      await catchAnimationCancel(_controller.animateTo(0.0, duration: animationDuration));
+      await catchAnimationCancel(_controller.animateTo(0.0, duration: scrollAnimationDuration));
       _isHighlighting = false;
     }
     _controller = null;

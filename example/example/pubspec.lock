@@ -84,9 +84,9 @@ packages:
   scroll_to_index:
     dependency: "direct main"
     description:
-      name: scroll_to_index
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../.."
+      relative: true
+    source: path
     version: "1.0.0"
   sky_engine:
     dependency: transitive
