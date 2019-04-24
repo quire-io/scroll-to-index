@@ -83,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
         counter = 0;
     });
 
-    await controller.scrollToIndex(counter, preferPosition: AutoScrollPosition.end);
+    await controller.scrollToIndex(counter, preferPosition: AutoScrollPosition.begin);
     controller.highlight(counter);
   }
 
