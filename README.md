@@ -26,11 +26,13 @@ This is a widget level library, means you can use this mechanism inside any Flut
 
 for example of Flutter ListView
 
-```
+``` dart
 ListView(
   scrollDirection: scrollDirection,
   controller: controller,
   children: randomList.map<Widget>((data) {
+  	final index = data[0];
+  	final height = data[1];
     return AutoScrollTag(
       key: ValueKey(index),
       controller: controller,
@@ -45,13 +47,13 @@ ListView(
 
 you can wrap any of your row widget using with variable height
 
-```
-  AutoScrollTag(
-    key: ValueKey(index),
-    controller: controller,
-    index: index,
-    child: child
-  )
+``` dart
+AutoScrollTag(
+  key: ValueKey(index),
+  controller: controller,
+  index: index,
+  child: child
+)
 ```
 
 with the `AutoScrollController` controller.
