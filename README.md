@@ -1,6 +1,6 @@
 # scroll-to-index
 
-A new Flutter package project.
+This package provides the scroll to index mechanism for fixed/variable row height for Flutter scrollable widget.
 
 ## Getting Started
 
@@ -22,9 +22,9 @@ For help getting started with Flutter, view the online [documentation](https://f
 
 ## Usage
 
-This is a widget level library, means you can use this mechanism inside any Flutter widget.
+This is a widget level library, means you can use this mechanism inside any Flutter scrollable widget.
 
-for example of Flutter ListView
+Example for Flutter ListView
 
 ``` dart
 ListView(
@@ -45,7 +45,7 @@ ListView(
 
 ```
 
-you can wrap any of your row widget using with variable height
+you can wrap any of your row widget which has dynamic row height
 
 ``` dart
 AutoScrollTag(
@@ -58,7 +58,28 @@ AutoScrollTag(
 
 with the `AutoScrollController` controller.
 
-for full example, please see the [example](https://github.com/quire-io/scroll-to-index/blob/master/example/example/lib/main.dart).
+when you need to trigger scroll to a specified index, you can call
+
+```
+controller.scrollToIndex(index, preferPosition: AutoScrollPosition.begin)
+```
+
+even more, with a fixed row height, you can give it a suggested height for more efficient scrolling. there are more configuration.
+
+```
+final controller = AutoScrollController(
+  //add this for advanced viewport boundary. e.g. SafeArea
+  viewportBoundaryGetter: () => Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
+
+  //choose vertical/horizontal
+  axis: scrollDirection,
+
+  //this given value will bring the scroll offset to the nearest position in fixed row height case
+  suggestedRowHeight: 200
+);
+```
+
+for full example, please see this [Demo](https://github.com/quire-io/scroll-to-index/blob/master/example/lib/main.dart).
 
 ## Who Uses
 
