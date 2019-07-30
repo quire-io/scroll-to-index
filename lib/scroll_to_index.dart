@@ -423,7 +423,7 @@ mixin AutoScrollControllerMixin on ScrollController implements AutoScrollControl
     if (ctx == null)
       return null;
 
-    final renderBox = ctx.findRenderObject() as RenderBox;
+    final renderBox = ctx.findRenderObject();
     final ScrollableState scrollableState = Scrollable.of(ctx);
     assert(scrollableState != null);
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(renderBox);
