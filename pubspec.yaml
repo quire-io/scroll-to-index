@@ -1,6 +1,6 @@
 name: scroll_to_index
 description: scroll to the index of any scrollable widget in Flutter
-version: 1.0.1
+version: 1.0.2
 author: Jerry Chen <b80203@gmail.com>
 homepage: https://github.com/quire-io/scroll-to-index
 environment:
