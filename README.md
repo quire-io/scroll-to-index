@@ -74,7 +74,9 @@ final controller = AutoScrollController(
   //choose vertical/horizontal
   axis: scrollDirection,
 
-  //this given value will bring the scroll offset to the nearest position in fixed row height case
+  //this given value will bring the scroll offset to the nearest position in fixed row height case.
+  //for variable row height case, you can still set the average height, it will try to get to the relatively closer offset 
+  //and then start searching.
   suggestedRowHeight: 200
 );
 ```
