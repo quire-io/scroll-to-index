@@ -513,29 +513,17 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W> with TickerPr
 
   @override
   Widget build(BuildContext context) {
-    if (_controller != null) {
-      return new DecoratedBoxTransition(
-        decoration: new DecorationTween(
-          begin: widget.color != null ?
-          new BoxDecoration(color: widget.color) :
-          new BoxDecoration(),
-          end: widget.color != null ?
-          new BoxDecoration(color: widget.color) :
-          new BoxDecoration(color: widget.highlightColor)
-        ).animate(_controller),
-        child: widget.child
-      );
-    } else {
-      if (widget.color != null) {
-        return new DecoratedBox(
-          decoration: new BoxDecoration(
-            color: widget.color
-          ),
-          child: widget.child,
-        );
-      } else
-        return widget.child;
-    }
+    return new DecoratedBoxTransition(
+      decoration: new DecorationTween(
+        begin: widget.color != null ?
+        new BoxDecoration(color: widget.color) :
+        new BoxDecoration(),
+        end: widget.color != null ?
+        new BoxDecoration(color: widget.color) :
+        new BoxDecoration(color: widget.highlightColor)
+      ).animate(_controller ?? kAlwaysDismissedAnimation),
+      child: widget.child
+    );
   }
 
   /// we used this flag is only for waiting the [_highlightDuration]
