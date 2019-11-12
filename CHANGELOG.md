@@ -14,3 +14,6 @@
 
 **1.0.4**
 * #16: setState cancels highlight
+
+**1.0.4+1**
+* fix leaks
