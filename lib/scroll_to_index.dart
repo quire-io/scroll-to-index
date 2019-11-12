@@ -552,10 +552,15 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W> with TickerPr
     await Future.delayed(highlightDuration);
 
     if (startKey0 == _startKey) {
-      setState((){});
-      await catchAnimationCancel(_controller.animateTo(0.0, duration: scrollAnimationDuration));
-      _controller = null;
-      _highlights.remove(this);
+      if (mounted) {
+        setState((){});
+        await catchAnimationCancel(_controller.animateTo(0.0, duration: scrollAnimationDuration));
+      }
+
+      if (startKey0 == _startKey) {
+        _controller = null;
+        _highlights.remove(this);
+      }
     }
     return null;
   }
