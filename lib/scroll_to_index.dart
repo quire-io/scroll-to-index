@@ -433,9 +433,9 @@ mixin AutoScrollControllerMixin on ScrollController implements AutoScrollControl
   }
 }
 
-void _cancelAllHighlights() {
+void _cancelAllHighlights([AutoScrollTagState state]) {
   for (final tag in _highlights.keys)
-    tag._cancelController();
+    tag._cancelController(reset: tag != state);
 
   _highlights.clear();
 }
@@ -483,15 +483,13 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W> with TickerPr
   @override
   void didUpdateWidget(W oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.index != widget.index || oldWidget.disabled != widget.disabled) {
+    if (oldWidget.index != widget.index || oldWidget.key != widget.key || oldWidget.disabled != widget.disabled) {
       if (!oldWidget.disabled)
         unregister(oldWidget.index);
 
       if (!widget.disabled)
         register(widget.index);
     }
-
-    _cancelController();
   }
 
   void register(int index) {
@@ -526,46 +524,48 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W> with TickerPr
     );
   }
 
-  /// we used this flag is only for waiting the [_highlightDuration]
-  bool _isHighlighting = false;
+  //used to make sure we will drop the old highlight
+  //it's rare that we call it more than once in same millisecond, so we just make the time stamp as the unique key
+  DateTime _startKey;
+  /// this function can be called multiple times. every call will reset the highlight style.
   Future highlight({bool cancelExisting: true, Duration highlightDuration: _highlightDuration}) async {
     if (!mounted)
       return null;
 
-    if (cancelExisting)
-      _cancelAllHighlights();
+    if (cancelExisting) {
+      _cancelAllHighlights(this);
+    }
+
+    if (_highlights.containsKey(this)) {
+      assert(_controller != null);
+      _controller.stop();
+    }
 
     if (_controller == null) {
       _controller = new AnimationController(vsync: this);
-      if (_highlights.containsKey(this))
-        _highlights[this].stop();
-
       _highlights[this] = _controller;
     }
 
+    final startKey0 = _startKey = DateTime.now();
     setState((){});
     await catchAnimationCancel(_controller.animateTo(1.0, duration: scrollAnimationDuration));
-    _isHighlighting = true;
     await Future.delayed(highlightDuration);
 
-    if (_controller != null && _isHighlighting) {
+    if (startKey0 == _startKey) {
       setState((){});
       await catchAnimationCancel(_controller.animateTo(0.0, duration: scrollAnimationDuration));
-      _isHighlighting = false;
+      _controller = null;
+      _highlights.remove(this);
     }
-    _controller = null;
-    _highlights.remove(this);
     return null;
   }
 
-  void _cancelController() {
-    _isHighlighting = false;
-
+  void _cancelController({bool reset: true}) {
     if (_controller != null) {
       if (_controller.isAnimating)
         _controller.stop();
 
-      if (_controller.value != 0.0)
+      if (reset && _controller.value != 0.0)
         _controller.value = 0.0;
     }
   }
