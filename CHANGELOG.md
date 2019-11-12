@@ -11,3 +11,6 @@
 
 **1.0.3**
 * #15: InputConnection closed when calling highlight()
+
+**1.0.4**
+* #16: setState cancels highlight
