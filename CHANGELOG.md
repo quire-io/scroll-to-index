@@ -17,3 +17,6 @@
 
 **1.0.4+1**
 * fix leaks
+
+**1.0.5**
+* #17: scroll to a index when empty ScrollTag state shouldn't cause exception
