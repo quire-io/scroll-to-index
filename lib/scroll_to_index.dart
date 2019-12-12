@@ -249,6 +249,8 @@ mixin AutoScrollControllerMixin on ScrollController implements AutoScrollControl
         prevOffset = currentOffset;
         final nearest = _getNearestIndex(index);
         final moveTarget = _forecastMoveUnit(index, nearest, usedSuggestedRowHeightIfAny);
+        if (moveTarget < 0)//can't forecast the move range
+          return null;
         // assume suggestRowHeight will move to correct offset in just one time.
         // if the rule doesn't work (in variable row height case), we will use backup solution (non-suggested way)
         final suggestedDuration = usedSuggestedRowHeightIfAny && suggestedRowHeight != null ? duration : null;
@@ -322,6 +324,9 @@ mixin AutoScrollControllerMixin on ScrollController implements AutoScrollControl
 
     final alignment = targetIndex > currentNearestIndex ? 1.0 : 0.0;
     double absoluteOffsetToViewport;
+
+    if (tagMap[currentNearestIndex] == null)
+      return -1;
 
     if (useSuggested && suggestedRowHeight != null) {
       final indexDiff = (targetIndex - currentNearestIndex);
