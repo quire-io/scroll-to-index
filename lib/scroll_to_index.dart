@@ -68,6 +68,9 @@ abstract class AutoScrollController implements ScrollController {
   /// check if there is a parent controller
   bool get hasParentController;
 
+  /// get current tag index in Viewport at now
+  int currentTagIndexInViewport({AutoScrollPosition preferPosition});
+
   /// scroll to the giving index
   Future scrollToIndex(int index, {Duration duration: scrollAnimationDuration,
     AutoScrollPosition preferPosition});
@@ -193,6 +196,54 @@ mixin AutoScrollControllerMixin on ScrollController implements AutoScrollControl
   Future scrollToIndex(int index, {Duration duration: scrollAnimationDuration,
     AutoScrollPosition preferPosition}) async {
     return co(this, () => _scrollToIndex(index, duration: duration, preferPosition: preferPosition));
+  }
+
+  @override
+  int currentTagIndexInViewport({AutoScrollPosition preferPosition}) {
+    final list = tagMap.keys;
+    if (list.isEmpty) return null;
+    double alignment = preferPosition == AutoScrollPosition.begin
+              ? 0.0
+              : preferPosition == AutoScrollPosition.end
+                  ? 1.0
+                  : 0.5;
+
+    final sorted = list.toList()
+      ..sort((int first, int second) => first.compareTo(second));
+
+    for (int index in sorted) {
+      final ctx = tagMap[index]?.context;
+      if (ctx == null) {
+        continue;
+      }
+      final object = ctx.findRenderObject();
+      final ScrollableState scrollableState = Scrollable.of(ctx);
+      assert(scrollableState != null);
+      final RenderAbstractViewport viewport = RenderAbstractViewport.of(object);
+      final revealedOffset = viewport.getOffsetToReveal(object, alignment);
+
+      final double vpHeight = viewport.paintBounds.height;
+      final ScrollPosition scrollPosition = scrollableState.position;
+
+      // Retrieve the dimensions of the item
+      final Size size = object?.semanticBounds?.size;
+
+      // Check if the item is in the viewport
+      final double deltaTop = revealedOffset.offset - scrollPosition.pixels;
+      final double deltaBottom = deltaTop + size.height;
+
+      bool isInViewport = false;
+
+      isInViewport = (deltaTop >= 0.0 && deltaTop < vpHeight);
+      if (!isInViewport) {
+        isInViewport = (deltaBottom > 0.0 && deltaBottom < vpHeight);
+      }
+
+      if (isInViewport) {
+        return index;
+      }
+    }
+    return null;
   }
 
   Future _scrollToIndex(int index, {Duration duration: scrollAnimationDuration, AutoScrollPosition preferPosition}) async {
