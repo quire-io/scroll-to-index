@@ -210,6 +210,7 @@ mixin AutoScrollControllerMixin on ScrollController implements AutoScrollControl
 
     final sorted = list.toList()
       ..sort((int first, int second) => first.compareTo(second));
+    int lastIndex = null;
 
     for (int index in sorted) {
       final ctx = tagMap[index]?.context;
@@ -240,10 +241,10 @@ mixin AutoScrollControllerMixin on ScrollController implements AutoScrollControl
       }
 
       if (isInViewport) {
-        return index;
+        lastIndex = index;
       }
     }
-    return null;
+    return lastIndex;
   }
 
   Future _scrollToIndex(int index, {Duration duration: scrollAnimationDuration, AutoScrollPosition preferPosition}) async {
