@@ -72,7 +72,8 @@ abstract class AutoScrollController implements ScrollController {
   Future scrollToIndex(int index, {Duration duration: scrollAnimationDuration,
     AutoScrollPosition preferPosition});
   /// highlight the item
-  Future highlight(int index, {bool cancelExistHighlights: true, Duration highlightDuration: _highlightDuration});
+  Future highlight(int index, {bool cancelExistHighlights: true,
+    Duration highlightDuration: _highlightDuration, bool animated: true});
   /// cancel all highlight item immediately.
   void cancelAllHighlights();
 
@@ -294,9 +295,10 @@ mixin AutoScrollControllerMixin on ScrollController implements AutoScrollControl
   }
 
   @override
-  Future highlight(int index, {bool cancelExistHighlights: true, Duration highlightDuration: _highlightDuration}) async {
+  Future highlight(int index, {bool cancelExistHighlights: true,
+    Duration highlightDuration: _highlightDuration, bool animated: true}) async {
     final tag = tagMap[index];
-    return tag == null ? null : await tag.highlight(cancelExisting: cancelExistHighlights, highlightDuration: highlightDuration);
+    return tag == null ? null : await tag.highlight(cancelExisting: cancelExistHighlights, highlightDuration: highlightDuration, animated: animated);
   }
 
   @override
@@ -533,7 +535,7 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W> with TickerPr
   //it's rare that we call it more than once in same millisecond, so we just make the time stamp as the unique key
   DateTime _startKey;
   /// this function can be called multiple times. every call will reset the highlight style.
-  Future highlight({bool cancelExisting: true, Duration highlightDuration: _highlightDuration}) async {
+  Future highlight({bool cancelExisting: true, Duration highlightDuration: _highlightDuration, bool animated: true}) async {
     if (!mounted)
       return null;
 
@@ -552,14 +554,22 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W> with TickerPr
     }
 
     final startKey0 = _startKey = DateTime.now();
+    const animationShow = 1.0;
     setState((){});
-    await catchAnimationCancel(_controller.animateTo(1.0, duration: scrollAnimationDuration));
+    if (animated)
+      await catchAnimationCancel(_controller.animateTo(animationShow, duration: scrollAnimationDuration));
+    else
+      _controller.value = animationShow;
     await Future.delayed(highlightDuration);
 
     if (startKey0 == _startKey) {
       if (mounted) {
         setState((){});
-        await catchAnimationCancel(_controller.animateTo(0.0, duration: scrollAnimationDuration));
+        const animationHide = 0.0;
+        if (animated)
+          await catchAnimationCancel(_controller.animateTo(animationHide, duration: scrollAnimationDuration));
+        else
+          _controller.value = animationHide;
       }
 
       if (startKey0 == _startKey) {

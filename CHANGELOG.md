@@ -20,3 +20,6 @@
 
 **1.0.5**
 * #17: scroll to a index when empty ScrollTag state shouldn't cause exception
+
+**1.0.6**
+* support animated highlight
