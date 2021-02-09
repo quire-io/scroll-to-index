@@ -26,6 +26,7 @@ Future<T> co<T>(key, FutureOr<T> action()) async {
 
     assert(identical(c, c2));
   }
+
   void catchError(ex, StackTrace st) {
     final c2 = _locks.remove(key);
     c.completeError(ex, st);
@@ -36,11 +37,9 @@ Future<T> co<T>(key, FutureOr<T> action()) async {
   try {
     final result = action();
     if (result is Future<T>) {
-      result
-        .then(then)
-        .catchError(catchError);
+      result.then(then).catchError(catchError);
     } else {
-      then(result as T);
+      then(result);
     }
   } catch (ex, st) {
     catchError(ex, st);
@@ -48,6 +47,7 @@ Future<T> co<T>(key, FutureOr<T> action()) async {
 
   return c.future;
 }
+
 final _locks = new HashMap<dynamic, Completer>();
 
 /// skip the TickerCanceled exception

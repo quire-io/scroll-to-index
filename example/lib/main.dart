@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -37,17 +37,18 @@ class _MyHomePageState extends State<MyHomePage> {
   final random = math.Random();
   final scrollDirection = Axis.vertical;
 
-  AutoScrollController controller;
-  List<List<int>> randomList;
+  late AutoScrollController controller;
+  late List<List<int>> randomList;
 
   @override
   void initState() {
     super.initState();
     controller = AutoScrollController(
-      viewportBoundaryGetter: () => Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
-      axis: scrollDirection
-    );
-    randomList = List.generate(maxCount, (index) => <int>[index, (1000 * random.nextDouble()).toInt()]);
+        viewportBoundaryGetter: () =>
+            Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
+        axis: scrollDirection);
+    randomList = List.generate(maxCount,
+        (index) => <int>[index, (1000 * random.nextDouble()).toInt()]);
   }
 
   @override
@@ -79,39 +80,34 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       counter++;
 
-      if (counter >= maxCount)
-        counter = 0;
+      if (counter >= maxCount) counter = 0;
     });
 
-    await controller.scrollToIndex(counter, preferPosition: AutoScrollPosition.begin);
+    await controller.scrollToIndex(counter,
+        preferPosition: AutoScrollPosition.begin);
     controller.highlight(counter);
   }
 
   Widget _getRow(int index, double height) {
     return _wrapScrollTag(
-      index: index,
-      child: Container(
-        padding: EdgeInsets.all(8),
-        alignment: Alignment.topCenter,
-        height: height,
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.lightBlue,
-            width: 4
-          ),
-          borderRadius: BorderRadius.circular(12)
-        ),
-        child: Text('index: $index, height: $height'),
-      )
-    );
+        index: index,
+        child: Container(
+          padding: EdgeInsets.all(8),
+          alignment: Alignment.topCenter,
+          height: height,
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.lightBlue, width: 4),
+              borderRadius: BorderRadius.circular(12)),
+          child: Text('index: $index, height: $height'),
+        ));
   }
 
-  Widget _wrapScrollTag({int index, Widget child})
-  => AutoScrollTag(
-    key: ValueKey(index),
-    controller: controller,
-    index: index,
-    child: child,
-    highlightColor: Colors.black.withOpacity(0.1),
-  );
+  Widget _wrapScrollTag({required int index, required Widget child}) =>
+      AutoScrollTag(
+        key: ValueKey(index),
+        controller: controller,
+        index: index,
+        child: child,
+        highlightColor: Colors.black.withOpacity(0.1),
+      );
 }
