@@ -1,5 +1,8 @@
 # CHANGES
 
+**2.0.0**
+**BREAKING** enabled null safety.
+
 **1.0.0**
 * public release
 
