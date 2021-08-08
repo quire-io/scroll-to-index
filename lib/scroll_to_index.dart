@@ -1,5 +1,5 @@
-// Copyright (C) 2019 Potix Corporation. All Rights Reserved.
-// History: Tue Apr 24 09:17 CST 2019
+//Copyright (C) 2019 Potix Corporation. All Rights Reserved.
+//History: Tue Apr 24 09:17 CST 2019
 // Author: Jerry Chen
 
 library scroll_to_index;
@@ -70,10 +70,13 @@ abstract class AutoScrollController implements ScrollController {
   /// check if there is a parent controller
   bool get hasParentController;
 
-  /// scroll to the giving index
+  /// scroll to the given index
   Future scrollToIndex(int index,
       {Duration duration: scrollAnimationDuration,
       AutoScrollPosition? preferPosition});
+
+  /// jump to the given index
+  Future jumpToIndex(int index, {AutoScrollPosition? preferPosition});
 
   /// highlight the item
   Future highlight(int index,
@@ -200,6 +203,7 @@ mixin AutoScrollControllerMixin on ScrollController
   }
 
   static const maxBound = 30; // 0.5 second if 60fps
+
   @override
   Future scrollToIndex(int index,
       {Duration duration: scrollAnimationDuration,
@@ -208,6 +212,14 @@ mixin AutoScrollControllerMixin on ScrollController
         this,
         () => _scrollToIndex(index,
             duration: duration, preferPosition: preferPosition));
+  }
+
+  @override
+  Future jumpToIndex(int index, {AutoScrollPosition? preferPosition}) async {
+    return co(
+        this,
+        () => _scrollToIndex(index,
+            preferPosition: preferPosition, useJumpTo: true));
   }
 
   Future _scrollToIndex(int index,
