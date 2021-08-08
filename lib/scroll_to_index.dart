@@ -254,7 +254,7 @@ mixin AutoScrollControllerMixin on ScrollController
       await _bringIntoViewportIfNeed(index, preferPosition,
           (double offset) async {
         if (useJumpTo) {
-          await jumpTo(offset);
+          jumpTo(offset);
         } else {
           await animateTo(offset, duration: duration, curve: Curves.ease);
         }
@@ -300,7 +300,7 @@ mixin AutoScrollControllerMixin on ScrollController
         spentDuration += suggestedDuration ?? moveDuration;
         final oldOffset = offset;
         if (useJumpTo) {
-          await jumpTo(currentOffset);
+          jumpTo(currentOffset);
         } else {
           await animateTo(currentOffset,
               duration: suggestedDuration ?? moveDuration, curve: Curves.ease);
@@ -321,7 +321,7 @@ mixin AutoScrollControllerMixin on ScrollController
           if (finalOffset != offset) {
             _isAutoScrolling = true;
             if (useJumpTo) {
-              await jumpTo(finalOffset);
+              jumpTo(finalOffset);
             } else {
               final remaining = duration - spentDuration;
               await animateTo(finalOffset,
@@ -338,7 +338,7 @@ mixin AutoScrollControllerMixin on ScrollController
                   i < count && hasClients && offset != finalOffset;
                   i++) {
                 if (useJumpTo) {
-                  await jumpTo(finalOffset);
+                  jumpTo(finalOffset);
                 } else {
                   await animateTo(finalOffset,
                       duration: _millisecond, curve: Curves.ease);
