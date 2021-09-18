@@ -378,8 +378,14 @@ mixin AutoScrollControllerMixin on ScrollController
     } else {
       final offsetToLastState =
           _offsetToRevealInViewport(currentNearestIndex, alignment);
-      assert((offsetToLastState?.offset ?? 0) >= 0,
-          "ERROR: %%%%%%%%%%%%%%: $targetIndex, $currentNearestIndex, $alignment, $offsetToLastState, ${tagMap.keys.toList().join(',')}");
+
+      assert(() {
+        if (position.extentAfter > 0)
+          return (offsetToLastState?.offset ?? 0) >= 0;
+        else
+          return true;
+      } (), "Please try to wrap all first level children widgets with AutoScrollTag.");
+      
       absoluteOffsetToViewport = offsetToLastState?.offset;
       if (absoluteOffsetToViewport == null)
         absoluteOffsetToViewport = defaultScrollDistanceOffset;
