@@ -407,6 +407,13 @@ mixin AutoScrollControllerMixin on ScrollController
       double targetOffset = _directionalOffsetToRevealInViewport(
           index, _positionToAlignment(preferPosition));
 
+      //content shorter than the whole scroll view
+      //this will prevent from scrolling bounce for a non-scrollable scroll view.
+      if (position.extentBefore == 0 && targetOffset < position.minScrollExtent)
+        targetOffset = position.minScrollExtent;
+      else if (position.extentAfter == 0 && targetOffset > position.maxScrollExtent)
+        targetOffset = position.maxScrollExtent;
+
       await move(targetOffset);
     } else {
       final begin = _directionalOffsetToRevealInViewport(index, 0);
