@@ -496,10 +496,12 @@ void _cancelAllHighlights([AutoScrollTagState? state]) {
   _highlights.clear();
 }
 
+typedef Widget TagHighlightBuilder(BuildContext context, Animation<double> highlight);
 class AutoScrollTag extends StatefulWidget {
   final AutoScrollController controller;
   final int index;
-  final Widget child;
+  final Widget? child;
+  final TagHighlightBuilder? builder;
   final Color? color;
   final Color? highlightColor;
   final bool disabled;
@@ -508,11 +510,12 @@ class AutoScrollTag extends StatefulWidget {
       {required Key key,
       required this.controller,
       required this.index,
-      required this.child,
+      this.child,
+      this.builder,
       this.color,
       this.highlightColor,
       this.disabled: false})
-      : super(key: key);
+      : assert(child != null || builder != null), super(key: key);
 
   @override
   AutoScrollTagState createState() {
@@ -577,16 +580,10 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W>
 
   @override
   Widget build(BuildContext context) {
-    return new DecoratedBoxTransition(
-        decoration: new DecorationTween(
-                begin: widget.color != null
-                    ? new BoxDecoration(color: widget.color)
-                    : new BoxDecoration(),
-                end: widget.color != null
-                    ? new BoxDecoration(color: widget.color)
-                    : new BoxDecoration(color: widget.highlightColor))
-            .animate(_controller ?? kAlwaysDismissedAnimation),
-        child: widget.child);
+    final animation = _controller ?? kAlwaysDismissedAnimation;
+    return widget.builder?.call(context, animation)
+          ?? buildHighlightTransition(context: context, highlight: animation, child: widget.child!,
+            background: widget.color, highlightColor: widget.highlightColor);
   }
 
   //used to make sure we will drop the old highlight
@@ -650,4 +647,19 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W>
       if (reset && _controller!.value != 0.0) _controller!.value = 0.0;
     }
   }
+}
+
+Widget buildHighlightTransition({required BuildContext context, required Animation<double> highlight, 
+  required Widget child, Color? background, Color? highlightColor}) {
+  return DecoratedBoxTransition(
+    decoration: DecorationTween(
+      begin: background != null ?
+      BoxDecoration(color: background) :
+      BoxDecoration(),
+      end: background != null ?
+      BoxDecoration(color: background) :
+      BoxDecoration(color: highlightColor)
+    ).animate(highlight),
+    child: child
+  );
 }
