@@ -402,20 +402,16 @@ mixin AutoScrollControllerMixin on ScrollController
   /// bring the state node (already created but all of it may not be fully in the viewport) into viewport
   Future _bringIntoViewportIfNeed(int index, AutoScrollPosition? preferPosition,
       Future move(double offset)) async {
-    final begin = _directionalOffsetToRevealInViewport(index, 0);
-    final end = _directionalOffsetToRevealInViewport(index, 1);
 
     if (preferPosition != null) {
       double targetOffset = _directionalOffsetToRevealInViewport(
           index, _positionToAlignment(preferPosition));
 
-      if (targetOffset < position.minScrollExtent)
-        targetOffset = position.minScrollExtent;
-      else if (targetOffset > position.maxScrollExtent)
-        targetOffset = position.maxScrollExtent;
-
       await move(targetOffset);
     } else {
+      final begin = _directionalOffsetToRevealInViewport(index, 0);
+      final end = _directionalOffsetToRevealInViewport(index, 1);
+
       final alreadyInViewport = offset < begin && offset > end;
       if (!alreadyInViewport) {
         double value;
