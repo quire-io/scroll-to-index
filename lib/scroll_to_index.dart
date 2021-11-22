@@ -413,12 +413,15 @@ mixin AutoScrollControllerMixin on ScrollController
       double targetOffset = _directionalOffsetToRevealInViewport(
           index, _positionToAlignment(preferPosition));
 
-      //content shorter than the whole scroll view
-      //this will prevent from scrolling bounce for a non-scrollable scroll view.
-      if (position.extentBefore == 0 && targetOffset < position.minScrollExtent)
-        targetOffset = position.minScrollExtent;
-      else if (position.extentAfter == 0 && targetOffset > position.maxScrollExtent)
-        targetOffset = position.maxScrollExtent;
+      // The content preferred position might be impossible to reach
+      // for items close to the edges of the scroll content, e.g.
+      // we cannot put the first item at the end of the viewport or
+      // the last item at the beginning. Trying to do so might lead
+      // to a bounce at either the top or bottom, unless the scroll
+      // physics are set to clamp. To prevent this, we limit the
+      // offset to not overshoot the extent in either direction.
+      targetOffset = targetOffset.clamp(
+          position.minScrollExtent, position.maxScrollExtent);
 
       await move(targetOffset);
     } else {
