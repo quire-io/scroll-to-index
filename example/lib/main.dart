@@ -100,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future _scrollToCounter() async {
     await controller.scrollToIndex(counter,
-        preferPosition: AutoScrollPosition.middle);
+        preferPosition: AutoScrollPosition.begin);
     controller.highlight(counter);
   }
 
