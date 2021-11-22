@@ -34,6 +34,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const maxCount = 100;
+  static const double maxHeight = 1000;
   final random = math.Random();
   final scrollDirection = Axis.vertical;
 
@@ -48,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
         axis: scrollDirection);
     randomList = List.generate(maxCount,
-        (index) => <int>[index, (1000 * random.nextDouble()).toInt()]);
+            (index) => <int>[index, (maxHeight * random.nextDouble()).toInt()]);
   }
 
   @override
@@ -56,6 +57,22 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() => counter = 0);
+              _scrollToCounter();
+            },
+            icon: Text('First'),
+          ),
+          IconButton(
+            onPressed: () {
+              setState(() => counter = maxCount - 1);
+              _scrollToCounter();
+            },
+            icon: Text('Last'),
+          )
+        ],
       ),
       body: ListView(
         scrollDirection: scrollDirection,
@@ -68,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }).toList(),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _scrollToIndex,
+        onPressed: _nextCounter,
         tooltip: 'Increment',
         child: Text(counter.toString()),
       ),
@@ -76,15 +93,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   int counter = -1;
-  Future _scrollToIndex() async {
-    setState(() {
-      counter++;
+  Future _nextCounter() {
+    setState(() => counter = (counter + 1) % maxCount);
+    return _scrollToCounter();
+  }
 
-      if (counter >= maxCount) counter = 0;
-    });
-
+  Future _scrollToCounter() async {
     await controller.scrollToIndex(counter,
-        preferPosition: AutoScrollPosition.begin);
+        preferPosition: AutoScrollPosition.middle);
     controller.highlight(counter);
   }
 
