@@ -41,6 +41,8 @@ class _MyHomePageState extends State<MyHomePage> {
   late AutoScrollController controller;
   late List<List<int>> randomList;
 
+  Curve _curve = Curves.ease;
+
   @override
   void initState() {
     super.initState();
@@ -49,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
         axis: scrollDirection);
     randomList = List.generate(maxCount,
-            (index) => <int>[index, (maxHeight * random.nextDouble()).toInt()]);
+        (index) => <int>[index, (maxHeight * random.nextDouble()).toInt()]);
   }
 
   @override
@@ -74,15 +76,102 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: ListView(
-        scrollDirection: scrollDirection,
-        controller: controller,
-        children: randomList.map<Widget>((data) {
-          return Padding(
-            padding: EdgeInsets.all(8),
-            child: _getRow(data[0], math.max(data[1].toDouble(), 50.0)),
-          );
-        }).toList(),
+      body: Column(
+        children: [
+          Container(
+            color: (AppBarTheme.of(context).backgroundColor ??
+                    Theme.of(context).colorScheme.primary)
+                .withOpacity(.33),
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+            width: MediaQuery.of(context).size.width,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Curve:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 1.75 + 24,
+                  child: DropdownButtonFormField(
+                    value: _curve,
+                    icon: Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 24,
+                    ),
+                    iconSize: 24,
+                    items: {
+                      'linear': Curves.linear,
+                      'decelerate': Curves.decelerate,
+                      'fastLinearToSlowEaseIn': Curves.fastLinearToSlowEaseIn,
+                      'ease': Curves.ease,
+                      'easeIn': Curves.easeIn,
+                      'easeInToLinear': Curves.easeInToLinear,
+                      'easeInSine': Curves.easeInSine,
+                      'easeInQuad': Curves.easeInQuad,
+                      'easeInCubic': Curves.easeInCubic,
+                      'easeInQuart': Curves.easeInQuart,
+                      'easeInQuint': Curves.easeInQuint,
+                      'easeInExpo': Curves.easeInExpo,
+                      'easeInCirc': Curves.easeInCirc,
+                      'easeInBack': Curves.easeInBack,
+                      'easeOut': Curves.easeOut,
+                      'linearToEaseOut': Curves.linearToEaseOut,
+                      'easeOutSine': Curves.easeOutSine,
+                      'easeOutQuad': Curves.easeOutQuad,
+                      'easeOutCubic': Curves.easeOutCubic,
+                      'easeOutQuart': Curves.easeOutQuart,
+                      'easeOutQuint': Curves.easeOutQuint,
+                      'easeOutExpo': Curves.easeOutExpo,
+                      'easeOutCirc': Curves.easeOutCirc,
+                      'easeOutBack': Curves.easeOutBack,
+                      'easeInOut': Curves.easeInOut,
+                      'easeInOutSine': Curves.easeInOutSine,
+                      'easeInOutQuad': Curves.easeInOutQuad,
+                      'easeInOutCubic': Curves.easeInOutCubic,
+                      'easeInOutQuart': Curves.easeInOutQuart,
+                      'easeInOutQuint': Curves.easeInOutQuint,
+                      'easeInOutExpo': Curves.easeInOutExpo,
+                      'easeInOutCirc': Curves.easeInOutCirc,
+                      'easeInOutBack': Curves.easeInOutBack,
+                      'fastOutSlowIn': Curves.fastOutSlowIn,
+                      'slowMiddle': Curves.slowMiddle,
+                      'bounceIn': Curves.bounceIn,
+                      'bounceOut': Curves.bounceOut,
+                      'bounceInOut': Curves.bounceInOut,
+                      'elasticIn': Curves.elasticIn,
+                      'elasticOut': Curves.elasticOut,
+                      'elasticInOut': Curves.elasticInOut
+                    }
+                        .entries
+                        .map((entry) => DropdownMenuItem(
+                            value: entry.value,
+                            child: SizedBox(
+                                width: MediaQuery.of(context).size.width / 1.75,
+                                child: Text(entry.key))))
+                        .toList(),
+                    onChanged: (Curve? value) {
+                      _curve = value ?? Curves.ease;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              scrollDirection: scrollDirection,
+              controller: controller,
+              children: randomList.map<Widget>((data) {
+                return Padding(
+                  padding: EdgeInsets.all(8),
+                  child: _getRow(data[0], math.max(data[1].toDouble(), 50.0)),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _nextCounter,
@@ -99,8 +188,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future _scrollToCounter() async {
-    await controller.scrollToIndex(counter,
-        preferPosition: AutoScrollPosition.middle);
+    await controller.scrollToIndex(
+      counter,
+      preferPosition: AutoScrollPosition.middle,
+      curve: _curve,
+    );
     controller.highlight(counter);
   }
 
