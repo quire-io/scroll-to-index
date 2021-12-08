@@ -1,5 +1,9 @@
 # CHANGES
 
+**2.1.1**
+* #73: Fix unwanted bounce when preferPosition cannot be reached.
+* #69: Fix assertion error
+
 **2.1.0**
 * #45: support highlight builder
 * #61: don't check it if the scroll view is not scrollable
