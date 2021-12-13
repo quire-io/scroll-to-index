@@ -73,6 +73,7 @@ abstract class AutoScrollController implements ScrollController {
   /// scroll to the giving index
   Future scrollToIndex(int index,
       {Duration duration: scrollAnimationDuration,
+      bool animated: true,
       AutoScrollPosition? preferPosition});
 
   /// highlight the item
@@ -203,15 +204,19 @@ mixin AutoScrollControllerMixin on ScrollController
   @override
   Future scrollToIndex(int index,
       {Duration duration: scrollAnimationDuration,
+      bool animated: true,
       AutoScrollPosition? preferPosition}) async {
     return co(
         this,
         () => _scrollToIndex(index,
-            duration: duration, preferPosition: preferPosition));
+            duration: duration,
+            animated: animated,
+            preferPosition: preferPosition));
   }
 
   Future _scrollToIndex(int index,
       {Duration duration: scrollAnimationDuration,
+      bool animated: true,
       AutoScrollPosition? preferPosition}) async {
     assert(duration > Duration.zero);
 
@@ -240,8 +245,12 @@ mixin AutoScrollControllerMixin on ScrollController
 
       await _bringIntoViewportIfNeed(index, preferPosition,
           (double offset) async {
-        await animateTo(offset, duration: duration, curve: Curves.ease);
-        await _waitForWidgetStateBuild();
+        if (animated) {
+          await animateTo(offset, duration: duration, curve: Curves.ease);
+          await _waitForWidgetStateBuild();
+        } else {
+          jumpTo(offset);
+        }
         return null;
       });
 
@@ -282,9 +291,13 @@ mixin AutoScrollControllerMixin on ScrollController
         currentOffset = moveTarget;
         spentDuration += suggestedDuration ?? moveDuration;
         final oldOffset = offset;
-        await animateTo(currentOffset,
-            duration: suggestedDuration ?? moveDuration, curve: Curves.ease);
-        await _waitForWidgetStateBuild();
+        if (animated) {
+          await animateTo(currentOffset,
+              duration: suggestedDuration ?? moveDuration, curve: Curves.ease);
+          await _waitForWidgetStateBuild();
+        } else {
+          jumpTo(currentOffset);
+        }
         if (!hasClients || offset == oldOffset) {
           // already scroll to begin or end
           contains = isIndexStateInLayoutRange(index);
@@ -299,11 +312,16 @@ mixin AutoScrollControllerMixin on ScrollController
             (finalOffset) async {
           if (finalOffset != offset) {
             _isAutoScrolling = true;
-            final remaining = duration - spentDuration;
-            await animateTo(finalOffset,
-                duration: remaining <= Duration.zero ? _millisecond : remaining,
-                curve: Curves.ease);
-            await _waitForWidgetStateBuild();
+            if (animated) {
+              final remaining = duration - spentDuration;
+              await animateTo(finalOffset,
+                  duration:
+                      remaining <= Duration.zero ? _millisecond : remaining,
+                  curve: Curves.ease);
+              await _waitForWidgetStateBuild();
+            } else {
+              jumpTo(finalOffset);
+            }
 
             // not sure why it doesn't scroll to the given offset, try more within 3 times
             if (hasClients && offset != finalOffset) {
@@ -311,9 +329,13 @@ mixin AutoScrollControllerMixin on ScrollController
               for (var i = 0;
                   i < count && hasClients && offset != finalOffset;
                   i++) {
-                await animateTo(finalOffset,
-                    duration: _millisecond, curve: Curves.ease);
-                await _waitForWidgetStateBuild();
+                if (animated) {
+                  await animateTo(finalOffset,
+                      duration: _millisecond, curve: Curves.ease);
+                  await _waitForWidgetStateBuild();
+                } else {
+                  jumpTo(finalOffset);
+                }
               }
             }
             _isAutoScrolling = false;
