@@ -37,19 +37,29 @@ class _MyHomePageState extends State<MyHomePage> {
   static const double maxHeight = 1000;
   final random = math.Random();
   final scrollDirection = Axis.vertical;
+  final nestedParentScrollViewKey = GlobalKey();
 
   late AutoScrollController controller;
   late List<List<int>> randomList;
+  bool nested = false;
 
   @override
   void initState() {
     super.initState();
-    controller = AutoScrollController(
-        viewportBoundaryGetter: () =>
-            Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
-        axis: scrollDirection);
+    controller = _getController(nested);
     randomList = List.generate(maxCount,
             (index) => <int>[index, (maxHeight * random.nextDouble()).toInt()]);
+  }
+
+  AutoScrollController _getController(bool withScrollerKey) {
+    final scrollerKey = withScrollerKey ? nestedParentScrollViewKey : null;
+
+    return AutoScrollController(
+      viewportBoundaryGetter: () =>
+          Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
+      axis: scrollDirection,
+      scrollerWidgetKey: scrollerKey, // only need to assign in nested use case
+    );
   }
 
   @override
@@ -58,6 +68,16 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                nested = !nested;
+                controller = _getController(nested);
+              });
+            },
+            icon: Text(nested ? 'Single' : 'Nested'),
+            iconSize: 50,
+          ),
           IconButton(
             onPressed: () {
               setState(() => counter = 0);
@@ -74,20 +94,51 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: ListView(
-        scrollDirection: scrollDirection,
-        controller: controller,
-        children: randomList.map<Widget>((data) {
-          return Padding(
-            padding: EdgeInsets.all(8),
-            child: _getRow(data[0], math.max(data[1].toDouble(), 50.0)),
-          );
-        }).toList(),
-      ),
+      body: nested ? _buildNestedListView() : _buildSingleListView(),
       floatingActionButton: FloatingActionButton(
         onPressed: _nextCounter,
         tooltip: 'Increment',
         child: Text(counter.toString()),
+      ),
+    );
+  }
+
+  Widget _buildSingleListView() {
+    return ListView(
+      scrollDirection: scrollDirection,
+      controller: controller,
+      children: randomList.map<Widget>((data) {
+        return Padding(
+          padding: EdgeInsets.all(8),
+          child: _getRow(data[0], math.max(data[1].toDouble(), 50.0)),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildNestedListView() {
+    return SingleChildScrollView(
+      key: nestedParentScrollViewKey,
+      scrollDirection: Axis.vertical,
+      controller: controller,
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(40),
+            child: Text('Nested Demo', style: TextStyle(fontSize: 48)),
+          ),
+          ListView(
+            scrollDirection: scrollDirection,
+            physics: NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            children: randomList.map<Widget>((data) {
+              return Padding(
+                padding: EdgeInsets.all(8),
+                child: _getRow(data[0], math.max(data[1].toDouble(), 50.0)),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
