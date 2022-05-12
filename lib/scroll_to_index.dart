@@ -355,7 +355,7 @@ mixin AutoScrollControllerMixin on ScrollController
   /// it means if we do animation scrolling to a position, the Future call back will in [SchedulerPhase.midFrameMicrotasks].
   /// if we want to search viewport element depending on Widget State, we must delay it to [SchedulerPhase.persistentCallbacks].
   /// which is the phase widget build/layout/draw
-  Future _waitForWidgetStateBuild() => SchedulerBinding.instance!.endOfFrame;
+  Future _waitForWidgetStateBuild() => SchedulerBinding.instance.endOfFrame;
 
   /// NOTE: this is used to forcase the nearestIndex. if the the index equals targetIndex,
   /// we will use the function, calling _directionalOffsetToRevealInViewport to get move unit.
