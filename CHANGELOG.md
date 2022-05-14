@@ -1,5 +1,9 @@
 # CHANGES
 
+**3.0.0**
+**BREAKING**
+* #92: Support for flutter 3
+
 **2.1.1**
 * #73: Fix unwanted bounce when preferPosition cannot be reached.
 * #69: Fix assertion error
