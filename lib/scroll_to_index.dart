@@ -29,6 +29,7 @@ abstract class AutoScrollController implements ScrollController {
   factory AutoScrollController(
       {double initialScrollOffset: 0.0,
       bool keepScrollOffset: true,
+      GlobalKey? scrollerWidgetKey,
       double? suggestedRowHeight,
       ViewportBoundaryGetter viewportBoundaryGetter:
           defaultViewportBoundaryGetter,
@@ -38,6 +39,7 @@ abstract class AutoScrollController implements ScrollController {
     return SimpleAutoScrollController(
         initialScrollOffset: initialScrollOffset,
         keepScrollOffset: keepScrollOffset,
+        scrollerWidgetKey: scrollerWidgetKey,
         suggestedRowHeight: suggestedRowHeight,
         viewportBoundaryGetter: viewportBoundaryGetter,
         beginGetter: axis == Axis.horizontal ? (r) => r.left : (r) => r.top,
@@ -92,6 +94,8 @@ abstract class AutoScrollController implements ScrollController {
 class SimpleAutoScrollController extends ScrollController
     with AutoScrollControllerMixin {
   @override
+  final GlobalKey? scrollerWidgetKey;
+  @override
   final double? suggestedRowHeight;
   @override
   final ViewportBoundaryGetter viewportBoundaryGetter;
@@ -103,6 +107,7 @@ class SimpleAutoScrollController extends ScrollController
   SimpleAutoScrollController(
       {double initialScrollOffset: 0.0,
       bool keepScrollOffset: true,
+      this.scrollerWidgetKey,
       this.suggestedRowHeight,
       this.viewportBoundaryGetter: defaultViewportBoundaryGetter,
       required this.beginGetter,
@@ -120,6 +125,8 @@ class SimpleAutoScrollController extends ScrollController
 class PageAutoScrollController extends PageController
     with AutoScrollControllerMixin {
   @override
+  final GlobalKey? scrollerWidgetKey;
+  @override
   final double? suggestedRowHeight;
   @override
   final ViewportBoundaryGetter viewportBoundaryGetter;
@@ -132,6 +139,7 @@ class PageAutoScrollController extends PageController
       {int initialPage: 0,
       bool keepPage: true,
       double viewportFraction: 1.0,
+      this.scrollerWidgetKey,
       this.suggestedRowHeight,
       this.viewportBoundaryGetter: defaultViewportBoundaryGetter,
       AutoScrollController? copyTagsFrom,
@@ -149,6 +157,7 @@ mixin AutoScrollControllerMixin on ScrollController
     implements AutoScrollController {
   @override
   final Map<int, AutoScrollTagState> tagMap = <int, AutoScrollTagState>{};
+  GlobalKey? scrollerWidgetKey;
   double? get suggestedRowHeight;
   ViewportBoundaryGetter get viewportBoundaryGetter;
   AxisValueGetter get beginGetter;
@@ -478,11 +487,34 @@ mixin AutoScrollControllerMixin on ScrollController
 
     final renderBox = ctx.findRenderObject()!;
     assert(Scrollable.of(ctx) != null);
-    final RenderAbstractViewport viewport =
-        RenderAbstractViewport.of(renderBox)!;
-    final revealedOffset = viewport.getOffsetToReveal(renderBox, alignment);
+    final RenderAbstractViewport? viewport = scrollerWidgetKey != null
+        ? _getScrollerWidgetViewPort(scrollerWidgetKey!, renderBox)
+        : RenderAbstractViewport.of(renderBox);
+    assert(viewport != null);
+    final revealedOffset = viewport!.getOffsetToReveal(renderBox, alignment);
 
     return revealedOffset;
+  }
+
+  RenderAbstractViewport? _getScrollerWidgetViewPort(
+    GlobalKey scrollerWidgetKey,
+    RenderObject? childItem,
+  ) {
+    final scrollerWidgetCtx = scrollerWidgetKey.currentContext;
+    assert(scrollerWidgetCtx != null);
+    final scrollerRenderBox = scrollerWidgetCtx!.findRenderObject();
+    RenderAbstractViewport? viewportBeforeController;
+
+    while (childItem != null) {
+      if (childItem == scrollerRenderBox) {
+        return viewportBeforeController;
+      }
+      if (childItem is RenderAbstractViewport) {
+        viewportBeforeController = childItem;
+      }
+      childItem = childItem.parent as RenderObject?;
+    }
+    return null;
   }
 }
 
