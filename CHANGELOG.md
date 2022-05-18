@@ -1,5 +1,8 @@
 # CHANGES
 
+**3.0.1**
+* #94: Why can't forecast the move range when moveTarget is negative?
+
 **3.0.0**
 **BREAKING**
 * #92: Support for flutter 3
