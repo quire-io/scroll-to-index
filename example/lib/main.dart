@@ -119,11 +119,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _wrapScrollTag({required int index, required Widget child}) =>
-      AutoScrollTag(
-        key: ValueKey(index),
+      AutoScrollTag.simple(
         controller: controller,
         index: index,
         child: child,
-        highlightColor: Colors.black.withOpacity(0.1),
       );
 }

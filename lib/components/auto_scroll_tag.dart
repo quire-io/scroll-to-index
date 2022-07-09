@@ -10,7 +10,7 @@ class AutoScrollTag extends StatefulWidget {
   final Color? highlightColor;
   final bool disabled;
   final bool animation;
-  final bool isSimple;
+  final bool _isSimple;
 
   AutoScrollTag(
       {required Key key,
@@ -22,7 +22,7 @@ class AutoScrollTag extends StatefulWidget {
       this.highlightColor,
       this.animation = true,
       this.disabled = false})
-      : this.isSimple = false,
+      : this._isSimple = false,
       assert(child != null || builder != null),
       super(key: key);
   
@@ -30,13 +30,13 @@ class AutoScrollTag extends StatefulWidget {
       {required this.controller,
       required this.index,
       required this.child})
-      : this.isSimple = true,
+      : this._isSimple = true,
       this.builder = null,
       this.color = null,
       this.highlightColor = null,
       this.animation = false,
       this.disabled = false,
-      assert(child == null),
+      assert(child != null),
       super(key: ValueKey(index));
 
   @override
@@ -103,11 +103,10 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W>
   @override
   Widget build(BuildContext context) {
     Animation<double>? animationController;
-    if (widget.animation) {
+    if (widget.animation || widget.builder != null) {
       animationController = _controller ?? kAlwaysDismissedAnimation;
     }
-    assert(widget.builder != null && widget.animation);
-    assert(widget.isSimple && widget.child != null);
+    assert(widget._isSimple && widget.child != null);
 
     return widget.builder?.call(context, animationController!)
           ?? (widget.animation
