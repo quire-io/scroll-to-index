@@ -1,5 +1,8 @@
 # CHANGES
 
+**3.1.0**
+* great refactoring of the project and improvements in it
+
 **3.0.1**
 * #94: Why can't forecast the move range when moveTarget is negative?
 
