@@ -9,6 +9,11 @@ import 'dart:collection';
 
 import 'package:flutter/animation.dart';
 
+
+HashMap<dynamic, Completer<dynamic>> _locks =
+    HashMap<dynamic, Completer>();
+
+
 /// used to invoke async functions in order
 Future<T> co<T>(key, FutureOr<T> action()) async {
   for (;;) {
@@ -48,12 +53,12 @@ Future<T> co<T>(key, FutureOr<T> action()) async {
   return c.future;
 }
 
-final _locks = new HashMap<dynamic, Completer>();
 
 /// skip the TickerCanceled exception
-Future catchAnimationCancel(TickerFuture future) async {
+Future<void> catchAnimationCancel(TickerFuture future) async {
   return future.orCancel.catchError((_) async {
     // do nothing, skip TickerCanceled exception
     return null;
   }, test: (ex) => ex is TickerCanceled);
 }
+
