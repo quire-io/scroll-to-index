@@ -30,8 +30,8 @@ const int defaultDurationUnit = 40;
 const Duration _millisecond = const Duration(milliseconds: 1);
 const Duration _highlightDuration = const Duration(seconds: 3);
 const Duration scrollAnimationDuration = const Duration(milliseconds: 250);
-const Map<AutoScrollTagState, AnimationController?> _highlights =
-    const <AutoScrollTagState, AnimationController?>{};
+Map<AutoScrollTagState, AnimationController?> _highlights =
+    <AutoScrollTagState, AnimationController?>{};
 
 typedef Rect ViewportBoundaryGetter();
 typedef double AxisValueGetter(Rect rect);
