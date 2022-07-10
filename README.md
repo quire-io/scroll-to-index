@@ -56,18 +56,29 @@ AutoScrollTag(
 )
 ```
 
+or you can use its simplified version (Highlight transition disabled)
+
+``` dart
+AutoScrollTag.simple(
+  controller: controller,
+  index: index,
+  child: child
+)
+```
+
+
 with the `AutoScrollController` controller.
 
 when you need to trigger scroll to a specified index, you can call
 
-```
+``` dart
 controller.scrollToIndex(index, preferPosition: AutoScrollPosition.begin)
 ```
 
 even more, with a fixed row height, you can give it a suggested height for more efficient scrolling. there are more configuration.
 
-```
-final controller = AutoScrollController(
+``` dart
+AutoScrollController controller = AutoScrollController(
   //add this for advanced viewport boundary. e.g. SafeArea
   viewportBoundaryGetter: () => Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
 
