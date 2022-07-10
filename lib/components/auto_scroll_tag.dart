@@ -23,7 +23,6 @@ class AutoScrollTag extends StatefulWidget {
       this.animation = true,
       this.disabled = false})
       : this.isSimple = false,
-      assert(child != null || builder != null),
       super(key: key);
   
   AutoScrollTag.simple(
@@ -36,7 +35,6 @@ class AutoScrollTag extends StatefulWidget {
       this.highlightColor = null,
       this.animation = false,
       this.disabled = false,
-      assert(child != null),
       super(key: ValueKey(index));
 
   @override
