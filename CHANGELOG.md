@@ -1,5 +1,8 @@
 # CHANGES
 
+**3.1.3**
+* added AutoScrollControllerDefault
+
 **3.1.2**
 * solve error
 * improve AutoScrollTag widget

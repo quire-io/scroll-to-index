@@ -7,11 +7,16 @@ abstract class AutoScrollController implements ScrollController {
       {double initialScrollOffset = 0.0,
       bool keepScrollOffset = true,
       double? suggestedRowHeight,
+      AutoScrollControllerDefault? autoScrollDefault,
       ViewportBoundaryGetter viewportBoundaryGetter:
           defaultViewportBoundaryGetter,
       Axis? axis,
       String? debugLabel,
       AutoScrollController? copyTagsFrom}) {
+    if (autoScrollDefault != null) {
+      kAutoScrollControllerDefault = autoScrollDefault;
+    }
+
     return SimpleAutoScrollController(
         initialScrollOffset: initialScrollOffset,
         keepScrollOffset: keepScrollOffset,

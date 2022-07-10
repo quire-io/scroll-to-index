@@ -1,9 +1,10 @@
 part of '../scroll_to_index.dart';
 
 
-const AutoScrollControllerDefault kAutoScrollControllerDefault = const AutoScrollControllerDefault(
+AutoScrollControllerDefault kAutoScrollControllerDefault = const AutoScrollControllerDefault(
   defaultDuration: scrollAnimationDuration,
   defaultCurve: Curves.ease,
+  defaultAutoScrollPosition: AutoScrollPosition.begin,
 );
 
 
@@ -14,10 +15,10 @@ class AutoScrollControllerDefault {
   final Curve? defaultCurve;
 
   const AutoScrollControllerDefault({
-    this.defaultDuration,
+    this.defaultDuration = scrollAnimationDuration,
     this.defaultAutoScrollPosition,
-    this.defaultCurve
-  });
+    this.defaultCurve,
+  }) : super();
 
 }
 
