@@ -1,5 +1,8 @@
 # CHANGES
 
+**3.1.1**
+* solve error
+
 **3.1.0**
 * great refactoring of the project and improvements in it
 
