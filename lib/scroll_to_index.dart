@@ -35,7 +35,7 @@ Map<AutoScrollTagState, AnimationController?> _highlights =
 
 typedef Rect ViewportBoundaryGetter();
 typedef double AxisValueGetter(Rect rect);
-typedef Widget TagHighlightBuilder(BuildContext context, Widget? child, Animation<double> highlight);
+typedef Widget TagHighlightBuilder(BuildContext context, Widget child, Animation<double> highlight);
 
 
 Rect defaultViewportBoundaryGetter() => const Rect.fromLTRB(0.0, 0.0, 0.0, 0.0);

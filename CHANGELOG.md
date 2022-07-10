@@ -1,5 +1,9 @@
 # CHANGES
 
+**3.1.2**
+* solve error
+* improve AutoScrollTag widget
+
 **3.1.1**
 * solve error
 

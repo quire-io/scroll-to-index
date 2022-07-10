@@ -10,7 +10,7 @@ class AutoScrollTag extends StatefulWidget {
   final Color? highlightColor;
   final bool disabled;
   final bool animation;
-  final bool _isSimple;
+  final bool isSimple;
 
   AutoScrollTag(
       {required Key key,
@@ -22,15 +22,15 @@ class AutoScrollTag extends StatefulWidget {
       this.highlightColor,
       this.animation = true,
       this.disabled = false})
-      : this._isSimple = false,
+      : this.isSimple = false,
       assert(child != null || builder != null),
       super(key: key);
   
   AutoScrollTag.simple(
       {required this.controller,
       required this.index,
-      required this.child})
-      : this._isSimple = true,
+      this.child})
+      : this.isSimple = true,
       this.builder = null,
       this.color = null,
       this.highlightColor = null,
@@ -106,13 +106,12 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W>
     if (widget.animation || widget.builder != null) {
       animationController = _controller ?? kAlwaysDismissedAnimation;
     }
-    assert(widget._isSimple && widget.child == null);
 
-    return widget.builder?.call(context, widget.child, animationController!)
+    return widget.builder?.call(context, widget.child ?? const SizedBox(), animationController!)
           ?? (widget.animation
-                ? buildHighlightTransition(context: context, highlight: animationController!, child: widget.child!,
+                ? buildHighlightTransition(context: context, highlight: animationController!, child: widget.child ?? const SizedBox(),
                   background: widget.color, highlightColor: widget.highlightColor)
-                : widget.child!);
+                : widget.child ?? const SizedBox());
   }
 
   //used to make sure we will drop the old highlight
