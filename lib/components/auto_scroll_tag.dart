@@ -106,9 +106,9 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W>
     if (widget.animation || widget.builder != null) {
       animationController = _controller ?? kAlwaysDismissedAnimation;
     }
-    assert(widget._isSimple && widget.child != null);
+    assert(widget._isSimple && widget.child == null);
 
-    return widget.builder?.call(context, animationController!)
+    return widget.builder?.call(context, widget.child, animationController!)
           ?? (widget.animation
                 ? buildHighlightTransition(context: context, highlight: animationController!, child: widget.child!,
                   background: widget.color, highlightColor: widget.highlightColor)
