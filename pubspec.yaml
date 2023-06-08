@@ -3,8 +3,8 @@ description: Scroll to a specific child of any scrollable widget in Flutter
 version: 3.0.1
 homepage: https://github.com/quire-io/scroll-to-index
 environment:
-  sdk: '>=2.12.0 <3.0.0'
-  flutter: '>=3.0.0'
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.3.0'
 
 dependencies:
   flutter:
