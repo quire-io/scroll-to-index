@@ -30,6 +30,7 @@ abstract class AutoScrollController implements ScrollController {
       {double initialScrollOffset: 0.0,
       bool keepScrollOffset: true,
       double? suggestedRowHeight,
+      bool clampToMaxScrollExtent: true,
       ViewportBoundaryGetter viewportBoundaryGetter:
           defaultViewportBoundaryGetter,
       Axis? axis,
@@ -39,6 +40,7 @@ abstract class AutoScrollController implements ScrollController {
         initialScrollOffset: initialScrollOffset,
         keepScrollOffset: keepScrollOffset,
         suggestedRowHeight: suggestedRowHeight,
+        clampToMaxScrollExtent: clampToMaxScrollExtent,
         viewportBoundaryGetter: viewportBoundaryGetter,
         beginGetter: axis == Axis.horizontal ? (r) => r.left : (r) => r.top,
         endGetter: axis == Axis.horizontal ? (r) => r.right : (r) => r.bottom,
@@ -94,6 +96,8 @@ class SimpleAutoScrollController extends ScrollController
   @override
   final double? suggestedRowHeight;
   @override
+  final bool clampToMaxScrollExtent;
+  @override
   final ViewportBoundaryGetter viewportBoundaryGetter;
   @override
   final AxisValueGetter beginGetter;
@@ -104,6 +108,7 @@ class SimpleAutoScrollController extends ScrollController
       {double initialScrollOffset: 0.0,
       bool keepScrollOffset: true,
       this.suggestedRowHeight,
+      this.clampToMaxScrollExtent = true,
       this.viewportBoundaryGetter: defaultViewportBoundaryGetter,
       required this.beginGetter,
       required this.endGetter,
@@ -122,6 +127,8 @@ class PageAutoScrollController extends PageController
   @override
   final double? suggestedRowHeight;
   @override
+  final bool clampToMaxScrollExtent;
+  @override
   final ViewportBoundaryGetter viewportBoundaryGetter;
   @override
   final AxisValueGetter beginGetter = (r) => r.left;
@@ -133,6 +140,7 @@ class PageAutoScrollController extends PageController
       bool keepPage: true,
       double viewportFraction: 1.0,
       this.suggestedRowHeight,
+      this.clampToMaxScrollExtent = true,
       this.viewportBoundaryGetter: defaultViewportBoundaryGetter,
       AutoScrollController? copyTagsFrom,
       String? debugLabel})
@@ -150,6 +158,7 @@ mixin AutoScrollControllerMixin on ScrollController
   @override
   final Map<int, AutoScrollTagState> tagMap = <int, AutoScrollTagState>{};
   double? get suggestedRowHeight;
+  bool get clampToMaxScrollExtent;
   ViewportBoundaryGetter get viewportBoundaryGetter;
   AxisValueGetter get beginGetter;
   AxisValueGetter get endGetter;
@@ -415,8 +424,9 @@ mixin AutoScrollControllerMixin on ScrollController
       // physics are set to clamp. To prevent this, we limit the
       // offset to not overshoot the extent in either direction.
       targetOffset = targetOffset.clamp(
-          position.minScrollExtent, position.maxScrollExtent);
-
+        position.minScrollExtent,
+        clampToMaxScrollExtent ? position.maxScrollExtent : double.maxFinite,
+      );
       await move(targetOffset);
     } else {
       final begin = _directionalOffsetToRevealInViewport(index, 0);
