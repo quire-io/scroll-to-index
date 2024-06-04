@@ -396,7 +396,49 @@ mixin AutoScrollControllerMixin on ScrollController
       ..sort((int first, int second) => first.compareTo(second));
     final min = sorted.first;
     final max = sorted.last;
-    return (index - min).abs() < (index - max).abs() ? min : max;
+
+    if (index > min && index < max) {
+      return _getNearestIndexFromCurrentOffset(index, sorted);
+    } else {
+      return (index - min).abs() < (index - max).abs() ? min : max;
+    }
+  }
+
+  /// Returns the nearest item index to the given [index] from the list of
+  /// [storedItemIndexes]. If two finds to equally close indexes, returns the
+  /// one with the smaller distance to current offset.
+  int _getNearestIndexFromCurrentOffset(
+    int index,
+    List<int> storedItemIndexes,
+  ) {
+    int closestIndex = storedItemIndexes.first;
+    for (final storedIndex in storedItemIndexes) {
+      final differenceWithIndex = (storedIndex - index).abs();
+      final differenceWithLastClosestIndex = (closestIndex - index).abs();
+      if (differenceWithIndex < differenceWithLastClosestIndex) {
+        closestIndex = storedIndex;
+      } else if (differenceWithIndex == differenceWithLastClosestIndex) {
+        final distanceToLastClosestIndex = _distanceToItem(closestIndex);
+        final distanceToStoredIndex = _distanceToItem(storedIndex);
+        if (distanceToStoredIndex != null &&
+            distanceToLastClosestIndex != null &&
+            distanceToStoredIndex < distanceToLastClosestIndex) {
+          closestIndex = storedIndex;
+        }
+      }
+    }
+    return closestIndex;
+  }
+
+  /// returns the distance between the current offset and the offset of the item
+  /// at the given [index].
+  double? _distanceToItem(int index) {
+    final itemOffset = _offsetToRevealInViewport(index, 0.5)?.offset;
+    if (itemOffset == null) {
+      return null;
+    }
+
+    return (offset - itemOffset).abs();
   }
 
   /// bring the state node (already created but all of it may not be fully in the viewport) into viewport
@@ -477,9 +519,8 @@ mixin AutoScrollControllerMixin on ScrollController
     if (ctx == null) return null;
 
     final renderBox = ctx.findRenderObject()!;
-    assert(Scrollable.of(ctx) != null);
     final RenderAbstractViewport viewport =
-        RenderAbstractViewport.of(renderBox)!;
+        RenderAbstractViewport.of(renderBox);
     final revealedOffset = viewport.getOffsetToReveal(renderBox, alignment);
 
     return revealedOffset;

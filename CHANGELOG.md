@@ -1,5 +1,8 @@
 # CHANGES
 
+**3.0.2**
+* Fixed issues with scrolling in lists with AutomaticKeepAliveClientMixin item widgets
+
 **3.0.1**
 * #94: Why can't forecast the move range when moveTarget is negative?
 
