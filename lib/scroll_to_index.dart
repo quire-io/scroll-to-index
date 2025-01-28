@@ -73,7 +73,8 @@ abstract class AutoScrollController implements ScrollController {
   /// scroll to the giving index
   Future scrollToIndex(int index,
       {Duration duration: scrollAnimationDuration,
-      AutoScrollPosition? preferPosition});
+      AutoScrollPosition? preferPosition,
+      double? offset});
 
   /// highlight the item
   Future highlight(int index,
@@ -204,16 +205,20 @@ mixin AutoScrollControllerMixin on ScrollController
   @override
   Future scrollToIndex(int index,
       {Duration duration: scrollAnimationDuration,
-      AutoScrollPosition? preferPosition}) async {
+      AutoScrollPosition? preferPosition,
+      double? offset}) async {
     return co(
         this,
         () => _scrollToIndex(index,
-            duration: duration, preferPosition: preferPosition));
+            duration: duration,
+            preferPosition: preferPosition,
+            customOffset: offset));
   }
 
   Future _scrollToIndex(int index,
       {Duration duration: scrollAnimationDuration,
-      AutoScrollPosition? preferPosition}) async {
+      AutoScrollPosition? preferPosition,
+      double? customOffset}) async {
     assert(duration > Duration.zero);
 
     // In listView init or reload case, widget state of list item may not be ready for query.
@@ -241,7 +246,7 @@ mixin AutoScrollControllerMixin on ScrollController
 
       await _bringIntoViewportIfNeed(index, preferPosition,
           (double offset) async {
-        await animateTo(offset, duration: duration, curve: Curves.ease);
+        await animateTo(offset + (customOffset ?? 0), duration: duration, curve: Curves.ease);
         await _waitForWidgetStateBuild();
         return null;
       });
@@ -314,7 +319,7 @@ mixin AutoScrollControllerMixin on ScrollController
               for (var i = 0;
                   i < count && hasClients && offset != finalOffset;
                   i++) {
-                await animateTo(finalOffset,
+                await animateTo(finalOffset + (customOffset ?? 0),
                     duration: _millisecond, curve: Curves.ease);
                 await _waitForWidgetStateBuild();
               }
