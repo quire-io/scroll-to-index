@@ -1,5 +1,8 @@
 # CHANGES
 
+**3.0.2**
+* #111: Fix Scroll to an index is not working when row height is too large
+
 **3.0.1**
 * #94: Why can't forecast the move range when moveTarget is negative?
 
