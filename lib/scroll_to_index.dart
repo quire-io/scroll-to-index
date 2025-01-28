@@ -378,15 +378,25 @@ mixin AutoScrollControllerMixin on ScrollController
     } else {
       final revealedOffset0 = _offsetToRevealInViewport(currentNearestIndex, 0);
       final revealedOffset1 = _offsetToRevealInViewport(currentNearestIndex, 1);
-      // make it scroll to as short as possible
-      // since it's the farest possible one we can scroll to
-      double? offsetToLastState = revealedOffset0 == null
-          ? revealedOffset1 == null
-              ? null
-              : revealedOffset1.offset
-          : revealedOffset1 == null
-              ? revealedOffset0.offset
-              : math.min(revealedOffset0!.offset, revealedOffset1!.offset);
+
+      double? offsetToLastState;
+      if (currentNearestIndex < targetIndex) {
+        // the current nearest index is less than the target
+        // we should scroll to the end of it in this round to
+        // make it as close to the target as possible.
+        offsetToLastState = revealedOffset1?.offset ?? revealedOffset0?.offset;
+      } else {
+        // make it scroll to as short as possible
+        // since it's the farest possible one we can scroll to
+        offsetToLastState = revealedOffset0 == null
+            ? revealedOffset1 == null
+                ? null
+                : revealedOffset1.offset
+            : revealedOffset1 == null
+                ? revealedOffset0.offset
+                : math.min(revealedOffset0!.offset, revealedOffset1!.offset);
+      }
+
       if (offsetToLastState == double.maxFinite) offsetToLastState = null;
 
       absoluteOffsetToViewport = offsetToLastState;
