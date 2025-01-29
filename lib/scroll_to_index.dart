@@ -27,10 +27,10 @@ Rect defaultViewportBoundaryGetter() => Rect.zero;
 
 abstract class AutoScrollController implements ScrollController {
   factory AutoScrollController(
-      {double initialScrollOffset: 0.0,
-      bool keepScrollOffset: true,
+      {double initialScrollOffset = 0.0,
+      bool keepScrollOffset = true,
       double? suggestedRowHeight,
-      ViewportBoundaryGetter viewportBoundaryGetter:
+      ViewportBoundaryGetter viewportBoundaryGetter =
           defaultViewportBoundaryGetter,
       Axis? axis,
       String? debugLabel,
@@ -72,14 +72,14 @@ abstract class AutoScrollController implements ScrollController {
 
   /// scroll to the giving index
   Future scrollToIndex(int index,
-      {Duration duration: scrollAnimationDuration,
+      {Duration duration = scrollAnimationDuration,
       AutoScrollPosition? preferPosition});
 
   /// highlight the item
   Future highlight(int index,
-      {bool cancelExistHighlights: true,
-      Duration highlightDuration: _highlightDuration,
-      bool animated: true});
+      {bool cancelExistHighlights = true,
+      Duration highlightDuration = _highlightDuration,
+      bool animated = true});
 
   /// cancel all highlight item immediately.
   void cancelAllHighlights();
@@ -101,10 +101,10 @@ class SimpleAutoScrollController extends ScrollController
   final AxisValueGetter endGetter;
 
   SimpleAutoScrollController(
-      {double initialScrollOffset: 0.0,
-      bool keepScrollOffset: true,
+      {double initialScrollOffset = 0.0,
+      bool keepScrollOffset = true,
       this.suggestedRowHeight,
-      this.viewportBoundaryGetter: defaultViewportBoundaryGetter,
+      this.viewportBoundaryGetter = defaultViewportBoundaryGetter,
       required this.beginGetter,
       required this.endGetter,
       AutoScrollController? copyTagsFrom,
@@ -129,11 +129,11 @@ class PageAutoScrollController extends PageController
   final AxisValueGetter endGetter = (r) => r.right;
 
   PageAutoScrollController(
-      {int initialPage: 0,
-      bool keepPage: true,
-      double viewportFraction: 1.0,
+      {int initialPage = 0,
+      bool keepPage = true,
+      double viewportFraction = 1.0,
       this.suggestedRowHeight,
-      this.viewportBoundaryGetter: defaultViewportBoundaryGetter,
+      this.viewportBoundaryGetter = defaultViewportBoundaryGetter,
       AutoScrollController? copyTagsFrom,
       String? debugLabel})
       : super(
@@ -203,7 +203,7 @@ mixin AutoScrollControllerMixin on ScrollController
   static const maxBound = 30; // 0.5 second if 60fps
   @override
   Future scrollToIndex(int index,
-      {Duration duration: scrollAnimationDuration,
+      {Duration duration = scrollAnimationDuration,
       AutoScrollPosition? preferPosition}) async {
     return co(
         this,
@@ -212,7 +212,7 @@ mixin AutoScrollControllerMixin on ScrollController
   }
 
   Future _scrollToIndex(int index,
-      {Duration duration: scrollAnimationDuration,
+      {Duration duration = scrollAnimationDuration,
       AutoScrollPosition? preferPosition}) async {
     assert(duration > Duration.zero);
 
@@ -330,9 +330,9 @@ mixin AutoScrollControllerMixin on ScrollController
 
   @override
   Future highlight(int index,
-      {bool cancelExistHighlights: true,
-      Duration highlightDuration: _highlightDuration,
-      bool animated: true}) async {
+      {bool cancelExistHighlights = true,
+      Duration highlightDuration = _highlightDuration,
+      bool animated = true}) async {
     final tag = tagMap[index];
     return tag == null
         ? null
@@ -394,7 +394,7 @@ mixin AutoScrollControllerMixin on ScrollController
                 : revealedOffset1.offset
             : revealedOffset1 == null
                 ? revealedOffset0.offset
-                : math.min(revealedOffset0!.offset, revealedOffset1!.offset);
+                : math.min(revealedOffset0.offset, revealedOffset1.offset);
       }
 
       if (offsetToLastState == double.maxFinite) offsetToLastState = null;
@@ -502,9 +502,8 @@ mixin AutoScrollControllerMixin on ScrollController
     if (ctx == null) return null;
 
     final renderBox = ctx.findRenderObject()!;
-    assert(Scrollable.of(ctx) != null);
     final RenderAbstractViewport viewport =
-        RenderAbstractViewport.of(renderBox)!;
+        RenderAbstractViewport.of(renderBox);
     final revealedOffset = viewport.getOffsetToReveal(renderBox, alignment);
 
     return revealedOffset;
@@ -538,7 +537,7 @@ class AutoScrollTag extends StatefulWidget {
       this.builder,
       this.color,
       this.highlightColor,
-      this.disabled: false})
+      this.disabled = false})
       : assert(child != null || builder != null),
         super(key: key);
 
@@ -621,9 +620,9 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W>
 
   /// this function can be called multiple times. every call will reset the highlight style.
   Future highlight(
-      {bool cancelExisting: true,
-      Duration highlightDuration: _highlightDuration,
-      bool animated: true}) async {
+      {bool cancelExisting = true,
+      Duration highlightDuration = _highlightDuration,
+      bool animated = true}) async {
     if (!mounted) return null;
 
     if (cancelExisting) {
@@ -669,7 +668,7 @@ class AutoScrollTagState<W extends AutoScrollTag> extends State<W>
     return null;
   }
 
-  void _cancelController({bool reset: true}) {
+  void _cancelController({bool reset = true}) {
     if (_controller != null) {
       if (_controller!.isAnimating) _controller!.stop();
 
